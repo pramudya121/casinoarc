@@ -18,6 +18,26 @@ const Traders = () => {
 
   useEffect(() => {
     loadTraders();
+
+    // Subscribe to real-time updates
+    const channel = supabase
+      .channel('traders-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'leaderboard_trader'
+        },
+        () => {
+          loadTraders();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const loadTraders = async () => {
