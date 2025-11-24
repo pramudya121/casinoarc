@@ -34,6 +34,27 @@ const Profile = () => {
       return;
     }
     loadProfile();
+
+    // Subscribe to real-time updates
+    const channel = supabase
+      .channel('profile-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'game_history',
+          filter: `wallet_address=eq.${account}`
+        },
+        () => {
+          loadProfile();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [account]);
 
   const loadProfile = async () => {

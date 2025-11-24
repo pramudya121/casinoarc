@@ -19,6 +19,26 @@ const Leaderboard = () => {
 
   useEffect(() => {
     loadLeaderboard();
+
+    // Subscribe to real-time updates
+    const channel = supabase
+      .channel('leaderboard-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'leaderboard_casino'
+        },
+        () => {
+          loadLeaderboard();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const loadLeaderboard = async () => {

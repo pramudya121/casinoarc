@@ -44,10 +44,16 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
     }
 
     setLoading(true);
+    toast({
+      title: "Transaction Pending",
+      description: "Please confirm the transaction in your wallet...",
+    });
+
     try {
       const result = await onPlay(betAmount);
       
       const winAmount = result.win ? parseFloat(betAmount) * 2 : 0;
+      const profit = result.win ? winAmount - parseFloat(betAmount) : -parseFloat(betAmount);
       setLastResult({ win: result.win, amount: betAmount });
 
       // Record game history
@@ -60,7 +66,69 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
         tx_hash: result.tx.hash,
       });
 
-      // Update leaderboards
+      // Update casino leaderboard
+      const { data: casinoData } = await supabase
+        .from('leaderboard_casino')
+        .select('*')
+        .eq('wallet_address', account)
+        .single();
+
+      if (casinoData) {
+        await supabase
+          .from('leaderboard_casino')
+          .update({
+            total_wagered: casinoData.total_wagered + parseFloat(betAmount),
+            total_wins: casinoData.total_wins + (result.win ? 1 : 0),
+            biggest_win: Math.max(casinoData.biggest_win, winAmount),
+            last_updated: new Date().toISOString(),
+          })
+          .eq('wallet_address', account);
+      } else {
+        await supabase
+          .from('leaderboard_casino')
+          .insert({
+            wallet_address: account,
+            total_wagered: parseFloat(betAmount),
+            total_wins: result.win ? 1 : 0,
+            biggest_win: winAmount,
+          });
+      }
+
+      // Update trader leaderboard
+      const { data: traderData } = await supabase
+        .from('leaderboard_trader')
+        .select('*')
+        .eq('wallet_address', account)
+        .single();
+
+      if (traderData) {
+        const newGamesPlayed = traderData.games_played + 1;
+        const newTotalProfit = traderData.total_profit + profit;
+        const newWins = result.win ? 1 : 0;
+        const currentWins = Math.round((traderData.win_rate / 100) * traderData.games_played);
+        const newWinRate = ((currentWins + newWins) / newGamesPlayed) * 100;
+
+        await supabase
+          .from('leaderboard_trader')
+          .update({
+            games_played: newGamesPlayed,
+            total_profit: newTotalProfit,
+            win_rate: newWinRate,
+            last_updated: new Date().toISOString(),
+          })
+          .eq('wallet_address', account);
+      } else {
+        await supabase
+          .from('leaderboard_trader')
+          .insert({
+            wallet_address: account,
+            games_played: 1,
+            total_profit: profit,
+            win_rate: result.win ? 100 : 0,
+          });
+      }
+
+      // Show result toast
       if (result.win) {
         toast({
           title: "🎉 You Won!",
@@ -68,7 +136,7 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
         });
       } else {
         toast({
-          title: "Better luck next time",
+          title: "Better Luck Next Time",
           description: `You lost ${betAmount} USDC`,
           variant: "destructive",
         });
@@ -76,7 +144,7 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
     } catch (error: any) {
       console.error('Game error:', error);
       toast({
-        title: "Game Error",
+        title: "Transaction Failed",
         description: error.message || "Failed to play game",
         variant: "destructive",
       });
