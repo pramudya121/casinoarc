@@ -20,6 +20,8 @@ import FishPrawnCrab from "./pages/games/FishPrawnCrab";
 import Leaderboard from "./pages/Leaderboard";
 import Traders from "./pages/Traders";
 import Profile from "./pages/Profile";
+import Tournaments from "./pages/Tournaments";
+import TournamentDetail from "./pages/TournamentDetail";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +48,8 @@ const App = () => (
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/traders" element={<Traders />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/tournaments" element={<Tournaments />} />
+            <Route path="/tournament/:id" element={<TournamentDetail />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
