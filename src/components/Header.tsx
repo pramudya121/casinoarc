@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Wallet, User, LogOut, Spade, Trophy, TrendingUp } from "lucide-react";
+import { Wallet, User, LogOut, Spade, Trophy, TrendingUp, Target } from "lucide-react";
 import { useWeb3 } from "@/contexts/Web3Context";
 import { useState } from "react";
 import { WalletModal } from "./WalletModal";
@@ -29,6 +29,10 @@ export const Header = () => {
           <nav className="hidden md:flex items-center gap-6">
             <Link to="/" className="text-sm font-medium hover:text-primary transition-colors">
               Home
+            </Link>
+            <Link to="/tournaments" className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-1">
+              <Target className="w-4 h-4" />
+              Tournaments
             </Link>
             <Link to="/leaderboard" className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-1">
               <Trophy className="w-4 h-4" />

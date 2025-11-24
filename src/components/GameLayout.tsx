@@ -8,7 +8,8 @@ import { useWeb3 } from "@/contexts/Web3Context";
 import { parseEther } from "ethers";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trophy } from "lucide-react";
+import { useTournamentMode } from "@/hooks/useTournamentMode";
 
 interface GameLayoutProps {
   title: string;
@@ -23,6 +24,7 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
   const [betAmount, setBetAmount] = useState("0.01");
   const [loading, setLoading] = useState(false);
   const [lastResult, setLastResult] = useState<{ win: boolean; amount: string } | null>(null);
+  const { isTournamentMode, tournamentId } = useTournamentMode();
 
   const handlePlay = async () => {
     if (!account || !casinoGamesContract) {
@@ -128,6 +130,33 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
           });
       }
 
+      // Update tournament entry if in tournament mode
+      if (isTournamentMode && tournamentId) {
+        const { data: tournamentEntry } = await supabase
+          .from('tournament_entries')
+          .select('*')
+          .eq('tournament_id', tournamentId)
+          .eq('wallet_address', account)
+          .single();
+
+        if (tournamentEntry) {
+          const multiplier = result.win ? 2 : 0;
+          const score = tournamentEntry.total_score + (multiplier * parseFloat(betAmount));
+          
+          await supabase
+            .from('tournament_entries')
+            .update({
+              total_score: score,
+              games_played: tournamentEntry.games_played + 1,
+              best_multiplier: Math.max(tournamentEntry.best_multiplier, multiplier),
+              total_wagered: tournamentEntry.total_wagered + parseFloat(betAmount),
+              total_won: tournamentEntry.total_won + winAmount,
+            })
+            .eq('tournament_id', tournamentId)
+            .eq('wallet_address', account);
+        }
+      }
+
       // Show result toast
       if (result.win) {
         toast({
@@ -161,6 +190,12 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
           <div className="mb-8 text-center">
             <h1 className="text-4xl font-black mb-2 text-gradient-red glow-red">{title}</h1>
             <p className="text-muted-foreground">{description}</p>
+            {isTournamentMode && (
+              <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary rounded-lg">
+                <Trophy className="w-5 h-5 text-primary" />
+                <span className="font-bold text-primary">Tournament Mode Active</span>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

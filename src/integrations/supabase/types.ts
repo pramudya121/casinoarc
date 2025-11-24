@@ -218,6 +218,139 @@ export type Database = {
         }
         Relationships: []
       }
+      tournament_entries: {
+        Row: {
+          best_multiplier: number | null
+          games_played: number | null
+          id: string
+          joined_at: string | null
+          total_score: number | null
+          total_wagered: number | null
+          total_won: number | null
+          tournament_id: string
+          username: string | null
+          wallet_address: string
+        }
+        Insert: {
+          best_multiplier?: number | null
+          games_played?: number | null
+          id?: string
+          joined_at?: string | null
+          total_score?: number | null
+          total_wagered?: number | null
+          total_won?: number | null
+          tournament_id: string
+          username?: string | null
+          wallet_address: string
+        }
+        Update: {
+          best_multiplier?: number | null
+          games_played?: number | null
+          id?: string
+          joined_at?: string | null
+          total_score?: number | null
+          total_wagered?: number | null
+          total_won?: number | null
+          tournament_id?: string
+          username?: string | null
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_entries_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournament_results: {
+        Row: {
+          created_at: string | null
+          final_score: number
+          id: string
+          prize_amount: number
+          rank: number
+          tournament_id: string
+          username: string | null
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string | null
+          final_score: number
+          id?: string
+          prize_amount: number
+          rank: number
+          tournament_id: string
+          username?: string | null
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string | null
+          final_score?: number
+          id?: string
+          prize_amount?: number
+          rank?: number
+          tournament_id?: string
+          username?: string | null
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_results_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournaments: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          end_time: string
+          entry_fee: number
+          game_type: string
+          id: string
+          max_participants: number | null
+          name: string
+          prize_pool: number
+          start_time: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          end_time: string
+          entry_fee?: number
+          game_type: string
+          id?: string
+          max_participants?: number | null
+          name: string
+          prize_pool?: number
+          start_time: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          end_time?: string
+          entry_fee?: number
+          game_type?: string
+          id?: string
+          max_participants?: number | null
+          name?: string
+          prize_pool?: number
+          start_time?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           created_at: string | null
