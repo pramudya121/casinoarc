@@ -6,6 +6,7 @@ import { Trophy, Clock, Users, Coins, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
+import { useAutoFinalizeTournaments } from "@/hooks/useAutoFinalizeTournaments";
 
 interface Tournament {
   id: string;
@@ -25,6 +26,9 @@ const Tournaments = () => {
   const navigate = useNavigate();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Auto-finalize tournaments that have ended
+  useAutoFinalizeTournaments();
 
   useEffect(() => {
     loadTournaments();
