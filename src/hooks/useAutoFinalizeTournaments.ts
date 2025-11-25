@@ -5,10 +5,22 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 export const useAutoFinalizeTournaments = () => {
   useEffect(() => {
-    // Check and finalize tournaments every 60 seconds
-    const interval = setInterval(async () => {
+    const checkTournaments = async () => {
       try {
-        const response = await fetch(
+        // Update tournament statuses
+        await fetch(
+          `${SUPABASE_URL}/functions/v1/update-tournament-status`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            },
+          }
+        );
+
+        // Finalize completed tournaments
+        await fetch(
           `${SUPABASE_URL}/functions/v1/auto-finalize-tournaments`,
           {
             method: 'POST',
@@ -18,15 +30,16 @@ export const useAutoFinalizeTournaments = () => {
             },
           }
         );
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Auto-finalize check:', data);
-        }
       } catch (error) {
-        console.error('Error auto-finalizing tournaments:', error);
+        console.error('Error managing tournaments:', error);
       }
-    }, 60000); // Check every 60 seconds
+    };
+
+    // Run immediately on mount
+    checkTournaments();
+
+    // Then check every 30 seconds
+    const interval = setInterval(checkTournaments, 30000);
 
     return () => clearInterval(interval);
   }, []);
