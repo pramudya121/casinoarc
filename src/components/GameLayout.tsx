@@ -10,6 +10,9 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Trophy } from "lucide-react";
 import { useTournamentMode } from "@/hooks/useTournamentMode";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
+import { celebrateWin, celebrateBigWin } from "@/lib/confetti";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface GameLayoutProps {
   title: string;
@@ -25,6 +28,7 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
   const [loading, setLoading] = useState(false);
   const [lastResult, setLastResult] = useState<{ win: boolean; amount: string } | null>(null);
   const { isTournamentMode, tournamentId } = useTournamentMode();
+  const { playWinSound, playLoseSound, playClickSound } = useSoundEffects();
 
   const handlePlay = async () => {
     if (!account || !casinoGamesContract) {
@@ -157,13 +161,21 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
         }
       }
 
-      // Show result toast
+      // Show result toast with sound and confetti
       if (result.win) {
+        playWinSound();
+        const isBigWin = winAmount > parseFloat(betAmount) * 5;
+        if (isBigWin) {
+          celebrateBigWin();
+        } else {
+          celebrateWin();
+        }
         toast({
           title: "🎉 You Won!",
           description: `Congratulations! You won ${winAmount.toFixed(4)} USDC`,
         });
       } else {
+        playLoseSound();
         toast({
           title: "Better Luck Next Time",
           description: `You lost ${betAmount} USDC`,
@@ -224,7 +236,10 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
                     />
                   </div>
                   <Button 
-                    onClick={handlePlay} 
+                    onClick={() => {
+                      playClickSound();
+                      handlePlay();
+                    }}
                     disabled={loading || !account}
                     className="w-full btn-casino h-12 text-lg"
                   >
@@ -240,17 +255,30 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
                 </div>
               </Card>
 
-              {lastResult && (
-                <Card className={`card-casino p-6 ${lastResult.win ? 'border-green-500' : 'border-red-500'}`}>
-                  <h3 className="text-xl font-bold mb-2">
-                    {lastResult.win ? '🎉 Winner!' : '😔 Lost'}
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Bet: {lastResult.amount} USDC<br/>
-                    {lastResult.win ? `Won: ${(parseFloat(lastResult.amount) * 2).toFixed(4)} USDC` : 'Better luck next time!'}
-                  </p>
-                </Card>
-              )}
+              <AnimatePresence>
+                {lastResult && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                    transition={{ type: "spring", duration: 0.5 }}
+                  >
+                    <Card className={`card-casino p-6 ${lastResult.win ? 'border-green-500 shadow-green-500/50' : 'border-red-500 shadow-red-500/50'} shadow-lg`}>
+                      <motion.h3 
+                        className="text-xl font-bold mb-2"
+                        animate={lastResult.win ? { scale: [1, 1.1, 1] } : { x: [-10, 10, -10, 10, 0] }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        {lastResult.win ? '🎉 Winner!' : '😔 Lost'}
+                      </motion.h3>
+                      <p className="text-muted-foreground">
+                        Bet: {lastResult.amount} USDC<br/>
+                        {lastResult.win ? `Won: ${(parseFloat(lastResult.amount) * 2).toFixed(4)} USDC` : 'Better luck next time!'}
+                      </p>
+                    </Card>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <Card className="card-casino p-6">
                 <h3 className="text-lg font-bold mb-2">Game Info</h3>
