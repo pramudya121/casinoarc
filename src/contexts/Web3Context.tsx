@@ -13,6 +13,7 @@ interface Web3ContextType {
   treasuryContract: Contract | null;
   rngContract: Contract | null;
   balance: string;
+  updateBalance: () => Promise<void>;
 }
 
 const Web3Context = createContext<Web3ContextType | undefined>(undefined);
@@ -134,6 +135,16 @@ export const Web3Provider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateBalance = async () => {
+    if (!provider || !account) return;
+    try {
+      const bal = await provider.getBalance(account);
+      setBalance(formatEther(bal));
+    } catch (error) {
+      console.error('Failed to update balance:', error);
+    }
+  };
+
   const disconnect = () => {
     setAccount(null);
     setProvider(null);
@@ -164,6 +175,17 @@ export const Web3Provider = ({ children }: { children: ReactNode }) => {
     }
   }, [account]);
 
+  // Auto-refresh balance every 10 seconds
+  useEffect(() => {
+    if (!provider || !account) return;
+    
+    const interval = setInterval(() => {
+      updateBalance();
+    }, 10000);
+    
+    return () => clearInterval(interval);
+  }, [provider, account]);
+
   return (
     <Web3Context.Provider
       value={{
@@ -176,6 +198,7 @@ export const Web3Provider = ({ children }: { children: ReactNode }) => {
         treasuryContract,
         rngContract,
         balance,
+        updateBalance,
       }}
     >
       {children}
