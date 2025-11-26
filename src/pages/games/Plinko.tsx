@@ -2,6 +2,7 @@ import { useState } from "react";
 import { GameLayout } from "@/components/GameLayout";
 import { useWeb3 } from "@/contexts/Web3Context";
 import { parseEther } from "ethers";
+import { motion } from "framer-motion";
 
 const Plinko = () => {
   const [ballPosition, setBallPosition] = useState<number | null>(null);
@@ -37,24 +38,34 @@ const Plinko = () => {
       gameName="plinko"
     >
       <div className="space-y-6">
-        <div className="relative h-96 bg-muted/10 rounded-xl overflow-hidden">
+        <div className="relative h-96 bg-gradient-to-b from-muted/5 to-muted/20 rounded-xl overflow-hidden border border-primary/20">
+          {ballPosition !== null && (
+            <motion.div
+              initial={{ y: -50, x: '50%' }}
+              animate={{ y: 350, x: `${(ballPosition + 0.5) * (100 / 9)}%` }}
+              transition={{ duration: 1.5, ease: "easeIn" }}
+              className="absolute w-6 h-6 bg-primary rounded-full shadow-lg shadow-primary/50"
+            />
+          )}
+          
           <div className="absolute inset-0 flex items-end justify-center p-4">
             <div className="grid grid-cols-9 gap-2 w-full">
               {multipliers.map((mult, index) => (
-                <div
+                <motion.div
                   key={index}
-                  className={`p-2 text-center rounded text-sm font-bold ${
+                  whileHover={{ scale: 1.05 }}
+                  className={`p-2 text-center rounded text-sm font-bold transition-all ${
                     ballPosition === index
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/50 scale-110'
                       : mult >= 2
-                      ? 'bg-green-500/20'
+                      ? 'bg-green-500/20 text-green-400'
                       : mult === 1
-                      ? 'bg-yellow-500/20'
-                      : 'bg-red-500/20'
+                      ? 'bg-yellow-500/20 text-yellow-400'
+                      : 'bg-red-500/20 text-red-400'
                   }`}
                 >
                   {mult}x
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>

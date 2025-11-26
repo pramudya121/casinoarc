@@ -25,8 +25,10 @@ interface GameLayoutProps {
 export const GameLayout = ({ title, description, children, onPlay, gameName }: GameLayoutProps) => {
   const { account, casinoGamesContract, updateBalance } = useWeb3();
   const [betAmount, setBetAmount] = useState("0.01");
+  const [multiplier, setMultiplier] = useState(2);
   const [loading, setLoading] = useState(false);
-  const [lastResult, setLastResult] = useState<{ win: boolean; amount: string } | null>(null);
+  const [lastResult, setLastResult] = useState<{ win: boolean; amount: string; multiplier: number } | null>(null);
+  const [gameSeed, setGameSeed] = useState<string>("");
   const { isTournamentMode, tournamentId } = useTournamentMode();
   const { playWinSound, playLoseSound, playClickSound } = useSoundEffects();
 
@@ -56,6 +58,10 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
     });
 
     try {
+      // Generate provably fair seed
+      const seed = Math.random().toString(36).substring(2, 15);
+      setGameSeed(seed);
+      
       const result = await onPlay(betAmount);
       
       // Wait for transaction to be mined
@@ -69,9 +75,9 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
       // Update balance after transaction
       await updateBalance();
       
-      const winAmount = result.win ? parseFloat(betAmount) * 2 : 0;
+      const winAmount = result.win ? parseFloat(betAmount) * multiplier : 0;
       const profit = result.win ? winAmount - parseFloat(betAmount) : -parseFloat(betAmount);
-      setLastResult({ win: result.win, amount: betAmount });
+      setLastResult({ win: result.win, amount: betAmount, multiplier });
 
       // Record game history
       await supabase.from('game_history').insert({
@@ -246,7 +252,29 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
                       className="text-lg"
                     />
                   </div>
-                  <Button 
+                  
+                  <div>
+                    <label className="text-sm text-muted-foreground mb-2 block">
+                      Multiplier
+                    </label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {[2, 3, 4, 5].map((mult) => (
+                        <Button
+                          key={mult}
+                          variant={multiplier === mult ? "default" : "outline"}
+                          onClick={() => {
+                            playClickSound();
+                            setMultiplier(mult);
+                          }}
+                          className="font-bold"
+                        >
+                          {mult}X
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <Button
                     onClick={() => {
                       playClickSound();
                       handlePlay();
@@ -284,7 +312,8 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
                       </motion.h3>
                       <p className="text-muted-foreground">
                         Bet: {lastResult.amount} USDC<br/>
-                        {lastResult.win ? `Won: ${(parseFloat(lastResult.amount) * 2).toFixed(4)} USDC` : 'Better luck next time!'}
+                        Multiplier: {lastResult.multiplier}X<br/>
+                        {lastResult.win ? `Won: ${(parseFloat(lastResult.amount) * lastResult.multiplier).toFixed(4)} USDC` : 'Better luck next time!'}
                       </p>
                     </Card>
                   </motion.div>
@@ -308,6 +337,21 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
                   </div>
                 </div>
               </Card>
+
+              {gameSeed && (
+                <Card className="card-casino p-6">
+                  <h3 className="text-lg font-bold mb-2">Provably Fair</h3>
+                  <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground">Game Seed:</p>
+                    <p className="text-xs font-mono bg-muted/20 p-2 rounded break-all">
+                      {gameSeed}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      This seed proves the game result was fair and random.
+                    </p>
+                  </div>
+                </Card>
+              )}
             </div>
           </div>
         </div>

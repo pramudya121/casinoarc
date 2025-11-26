@@ -22,6 +22,7 @@ import Traders from "./pages/Traders";
 import Profile from "./pages/Profile";
 import Tournaments from "./pages/Tournaments";
 import TournamentDetail from "./pages/TournamentDetail";
+import TransactionHistory from "./pages/TransactionHistory";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/tournaments" element={<Tournaments />} />
             <Route path="/tournament/:id" element={<TournamentDetail />} />
+            <Route path="/transactions" element={<TransactionHistory />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
