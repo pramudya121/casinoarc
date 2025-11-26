@@ -23,7 +23,7 @@ interface GameLayoutProps {
 }
 
 export const GameLayout = ({ title, description, children, onPlay, gameName }: GameLayoutProps) => {
-  const { account, casinoGamesContract } = useWeb3();
+  const { account, casinoGamesContract, updateBalance } = useWeb3();
   const [betAmount, setBetAmount] = useState("0.01");
   const [loading, setLoading] = useState(false);
   const [lastResult, setLastResult] = useState<{ win: boolean; amount: string } | null>(null);
@@ -50,13 +50,24 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
     }
 
     setLoading(true);
-    toast({
+    const loadingToast = toast({
       title: "Transaction Pending",
       description: "Please confirm the transaction in your wallet...",
     });
 
     try {
       const result = await onPlay(betAmount);
+      
+      // Wait for transaction to be mined
+      toast({
+        title: "Processing",
+        description: "Waiting for blockchain confirmation...",
+      });
+      
+      await result.tx.wait();
+      
+      // Update balance after transaction
+      await updateBalance();
       
       const winAmount = result.win ? parseFloat(betAmount) * 2 : 0;
       const profit = result.win ? winAmount - parseFloat(betAmount) : -parseFloat(betAmount);
