@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Wallet, User, LogOut, Spade, Trophy, TrendingUp, Target, History, Shield } from "lucide-react";
+import { Wallet, User, LogOut, Spade, Trophy, TrendingUp, Target, History, Shield, Crown } from "lucide-react";
 import { useWeb3 } from "@/contexts/Web3Context";
 import { useState } from "react";
 import { WalletModal } from "./WalletModal";
@@ -41,6 +41,10 @@ export const Header = () => {
             <Link to="/traders" className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-1">
               <TrendingUp className="w-4 h-4" />
               Top Traders
+            </Link>
+            <Link to="/vip" className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-1">
+              <Crown className="w-4 h-4" />
+              VIP
             </Link>
             {account && (
               <>

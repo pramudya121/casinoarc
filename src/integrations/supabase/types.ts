@@ -351,6 +351,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_vip: {
+        Row: {
+          cashback_claimed: number
+          cashback_earned: number
+          created_at: string
+          current_level: number
+          id: string
+          total_wagered: number
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          cashback_claimed?: number
+          cashback_earned?: number
+          created_at?: string
+          current_level?: number
+          id?: string
+          total_wagered?: number
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          cashback_claimed?: number
+          cashback_earned?: number
+          created_at?: string
+          current_level?: number
+          id?: string
+          total_wagered?: number
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           created_at: string | null
@@ -369,6 +402,42 @@ export type Database = {
           id?: string
           username?: string | null
           wallet_address?: string
+        }
+        Relationships: []
+      }
+      vip_levels: {
+        Row: {
+          bonus_multiplier: number
+          cashback_rate: number
+          color: string | null
+          created_at: string
+          icon: string | null
+          id: string
+          level: number
+          min_wagered: number
+          name: string
+        }
+        Insert: {
+          bonus_multiplier?: number
+          cashback_rate?: number
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          level: number
+          min_wagered?: number
+          name: string
+        }
+        Update: {
+          bonus_multiplier?: number
+          cashback_rate?: number
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          level?: number
+          min_wagered?: number
+          name?: string
         }
         Relationships: []
       }
