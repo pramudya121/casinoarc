@@ -94,8 +94,7 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
         .from('leaderboard_casino')
         .select('*')
         .eq('wallet_address', account)
-        .single();
-
+        .maybeSingle();
       if (casinoData) {
         await supabase
           .from('leaderboard_casino')
@@ -122,8 +121,7 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
         .from('leaderboard_trader')
         .select('*')
         .eq('wallet_address', account)
-        .single();
-
+        .maybeSingle();
       if (traderData) {
         const newGamesPlayed = traderData.games_played + 1;
         const newTotalProfit = traderData.total_profit + profit;
@@ -158,8 +156,7 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
           .select('*')
           .eq('tournament_id', tournamentId)
           .eq('wallet_address', account)
-          .single();
-
+          .maybeSingle();
         if (tournamentEntry) {
           const multiplier = result.win ? 2 : 0;
           const score = tournamentEntry.total_score + (multiplier * parseFloat(betAmount));
