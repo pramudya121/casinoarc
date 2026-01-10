@@ -218,6 +218,72 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_codes: {
+        Row: {
+          commission_rate: number
+          created_at: string
+          id: string
+          referral_code: string
+          total_commission: number
+          total_referrals: number
+          wallet_address: string
+        }
+        Insert: {
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          referral_code: string
+          total_commission?: number
+          total_referrals?: number
+          wallet_address: string
+        }
+        Update: {
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          referral_code?: string
+          total_commission?: number
+          total_referrals?: number
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          commission_claimed: number
+          commission_earned: number
+          created_at: string
+          games_by_referred: number
+          id: string
+          referral_code: string
+          referred_address: string
+          referrer_address: string
+          updated_at: string
+        }
+        Insert: {
+          commission_claimed?: number
+          commission_earned?: number
+          created_at?: string
+          games_by_referred?: number
+          id?: string
+          referral_code: string
+          referred_address: string
+          referrer_address: string
+          updated_at?: string
+        }
+        Update: {
+          commission_claimed?: number
+          commission_earned?: number
+          created_at?: string
+          games_by_referred?: number
+          id?: string
+          referral_code?: string
+          referred_address?: string
+          referrer_address?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tournament_entries: {
         Row: {
           best_multiplier: number | null
