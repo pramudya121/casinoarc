@@ -8,9 +8,10 @@ import { useWeb3 } from "@/contexts/Web3Context";
 import { parseEther } from "ethers";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Trophy } from "lucide-react";
+import { Loader2, Trophy, Crown } from "lucide-react";
 import { useTournamentMode } from "@/hooks/useTournamentMode";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
+import { useVIPSystem } from "@/hooks/useVIPSystem";
 import { celebrateWin, celebrateBigWin } from "@/lib/confetti";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -31,6 +32,7 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
   const [gameSeed, setGameSeed] = useState<string>("");
   const { isTournamentMode, tournamentId } = useTournamentMode();
   const { playWinSound, playLoseSound, playClickSound } = useSoundEffects();
+  const { updateVIPProgress } = useVIPSystem();
 
   const handlePlay = async () => {
     if (!account || !casinoGamesContract) {
@@ -175,6 +177,9 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
         }
       }
 
+      // Update VIP progress
+      const vipResult = await updateVIPProgress(account, parseFloat(betAmount), result.win);
+      
       // Show result toast with sound and confetti
       if (result.win) {
         playWinSound();
@@ -194,6 +199,15 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
           title: "Better Luck Next Time",
           description: `You lost ${betAmount} USDC`,
           variant: "destructive",
+        });
+      }
+
+      // Show VIP level up notification
+      if (vipResult?.leveledUp && vipResult.newLevel) {
+        celebrateBigWin();
+        toast({
+          title: "🎉 VIP Level Up!",
+          description: `Congratulations! You reached ${vipResult.newLevel.name}!`,
         });
       }
     } catch (error: any) {
