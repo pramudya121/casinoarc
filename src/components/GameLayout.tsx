@@ -12,6 +12,7 @@ import { Loader2, Trophy, Crown } from "lucide-react";
 import { useTournamentMode } from "@/hooks/useTournamentMode";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useVIPSystem } from "@/hooks/useVIPSystem";
+import { useReferralSystem } from "@/hooks/useReferralSystem";
 import { celebrateWin, celebrateBigWin } from "@/lib/confetti";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -33,6 +34,7 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
   const { isTournamentMode, tournamentId } = useTournamentMode();
   const { playWinSound, playLoseSound, playClickSound } = useSoundEffects();
   const { updateVIPProgress } = useVIPSystem();
+  const { updateReferralCommission } = useReferralSystem();
 
   const handlePlay = async () => {
     if (!account || !casinoGamesContract) {
@@ -179,6 +181,9 @@ export const GameLayout = ({ title, description, children, onPlay, gameName }: G
 
       // Update VIP progress
       const vipResult = await updateVIPProgress(account, parseFloat(betAmount), result.win);
+      
+      // Update referral commission
+      await updateReferralCommission(account, parseFloat(betAmount));
       
       // Show result toast with sound and confetti
       if (result.win) {

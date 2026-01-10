@@ -25,6 +25,7 @@ import TournamentDetail from "./pages/TournamentDetail";
 import TransactionHistory from "./pages/TransactionHistory";
 import Admin from "./pages/Admin";
 import VIP from "./pages/VIP";
+import Referral from "./pages/Referral";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => (
             <Route path="/transactions" element={<TransactionHistory />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/vip" element={<VIP />} />
+            <Route path="/referral" element={<Referral />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
